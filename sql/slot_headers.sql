@@ -1,0 +1,12 @@
+
+CREATE TABLE IF NOT EXISTS `slot_headers` (
+   seq INTEGER PRIMARY KEY,
+   sig VARCHAR(66) NOT NULL,
+   vers SMALLINT DEFAULT 0,
+   height INTEGER NOT NULL,
+   gas_used INTEGER DEFAULT 0,
+   state_root VARCHAR(66) NOT NULL,
+   tx_root VARCHAR(66) NOT NULL,
+   parent_sig VARCHAR(66) NOT NULL,
+   ts INTEGER DEFAULT 0
+);
