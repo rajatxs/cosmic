@@ -1,8 +1,6 @@
 package ledger
 
 import (
-	"fmt"
-
 	"github.com/rajatxs/cosmic/core"
 	"github.com/rajatxs/cosmic/crypto"
 	"github.com/rajatxs/cosmic/logger"
@@ -15,23 +13,8 @@ func init() {
 
 	// creates `block_headers` table if not exists
 	if !storage.CheckTableExistence(BlockHeaderTableName) {
-		storage.Sql.Exec(fmt.Sprintf(
-			`CREATE TABLE %s ( 
-				id UNSIGNED INTEGER PRIMARY KEY, 
-				sig BLOB(32) NOT NULL, 
-				height UNSIGNED INTEGER NOT NULL, 
-				version UNSIGNED SMALLINT DEFAULT 0, 
-				gas_used UNSIGNED INTEGER DEFAULT 0,
-				reward UNSIGNED INTEGER DEFAULT 0,
-				total_tx UNSIGNED SMALLINT DEFAULT 0, 
-				state_sig BLOB(32) NOT NULL, 
-				tx_sig BLOB(32) NOT NULL, 
-				parent_block_sig BLOB(32) NOT NULL, 
-				ts UNSIGNED INTEGER DEFAULT 0
-			);`,
-			BlockHeaderTableName))
-
-		logger.Info("Created table", "block_headers")
+		storage.ExecQuery(BlockHeaderTableName)
+		logger.Info("Created table", BlockHeaderTableName)
 	}
 }
 
