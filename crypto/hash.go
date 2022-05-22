@@ -12,5 +12,5 @@ func Sha256(data []byte) []byte {
 }
 
 func Sha256ToHex(data []byte) string {
-	return EncodeToHex(Sha256(data))
+	return BytesToHex(Sha256(data))
 }

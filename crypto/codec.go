@@ -1,6 +1,8 @@
 package crypto
 
-import "encoding/hex"
+import (
+	"encoding/hex"
+)
 
 var NilSha256Bytes = []byte{
 	00, 00, 00, 00, 00,
@@ -13,7 +15,7 @@ var NilSha256Bytes = []byte{
 }
 
 // Encodes `data` into hex string
-func EncodeToHex(data []byte) string {
+func BytesToHex(data []byte) string {
 	return "0x" + hex.EncodeToString(data)
 }
 
