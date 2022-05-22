@@ -2,6 +2,8 @@ debug
 temp
 .data
 
+debug.sh
 .vscode
 .cache
 *.log
+*.db
