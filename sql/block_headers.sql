@@ -1,5 +1,5 @@
 
-CREATE TABLE `block_headers` ( 
+CREATE TABLE IF NOT EXISTS `block_headers` ( 
    id UNSIGNED INTEGER PRIMARY KEY, 
 	sig BLOB(32) NOT NULL, 
    height UNSIGNED INTEGER NOT NULL, 
