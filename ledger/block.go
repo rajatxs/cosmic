@@ -1,8 +1,9 @@
 package ledger
 
 import (
+	"fmt"
+
 	"github.com/rajatxs/cosmic/core"
-	"github.com/rajatxs/cosmic/crypto"
 	"github.com/rajatxs/cosmic/logger"
 	"github.com/rajatxs/cosmic/storage"
 )
@@ -18,73 +19,74 @@ func init() {
 	}
 }
 
-// Returns `BlockHeader` by `seq`
-func GetBlockHeaderById(seq uint64) *core.BlockHeader {
-	var stateSig, txSig, parentBlockSig string
-	var sh *core.BlockHeader = &core.BlockHeader{}
-
+// Returns `BlockHeader` by `id`
+func ReadBlockHeaderById(id uint64, bh *core.BlockHeader) error {
 	result := storage.Sql.QueryRow(
-		`SELECT id, height, version, gas_used, reward, total_tx, state_tx, tx_sig, parent_block_sig, ts
-		FROM block_headers WHERE block_headers.seq = ?;`,
-		seq)
+		`SELECT id, height, version, gas_used, reward, total_tx, state_sig, tx_sig, parent_block_sig, ts
+		FROM block_headers WHERE block_headers.id = ?;`,
+		id)
 
-	result.Scan(
-		&sh.Id,
-		&sh.Height,
-		&sh.Version,
-		&sh.GasUsed,
-		&sh.Reward,
-		&sh.TotalTx,
-		&stateSig,
-		&txSig,
-		&parentBlockSig,
-		&sh.Time,
-	)
+	if scanError := result.Scan(
+		&bh.Id,
+		&bh.Height,
+		&bh.Version,
+		&bh.GasUsed,
+		&bh.Reward,
+		&bh.TotalTx,
+		&bh.StateSig,
+		&bh.TxSig,
+		&bh.ParentBlockSig,
+		&bh.Time,
+	); scanError != nil {
+		logger.Err(fmt.Sprintf("Couldn't read block header %d", id), scanError)
+		return scanError
+	}
 
-	sh.StateSig = crypto.HexToBytes(stateSig)
-	sh.TxSig = crypto.HexToBytes(txSig)
-	sh.ParentBlockSig = crypto.HexToBytes(parentBlockSig)
-
-	return sh
+	return nil
 }
 
-func GetLastInsertedBlockId() uint64 {
-	var seq uint64
+func GetLatestBlockId() uint64 {
+	var id uint64
 
 	row := storage.Sql.QueryRow("SELECT MAX(block_headers.id) FROM `block_headers` LIMIT 1;")
-	row.Scan(&seq)
-	return seq
+	row.Scan(&id)
+	return id
+}
+
+func GetLatestBlock() *core.BlockHeader {
+	var bh *core.BlockHeader
+	return bh
 }
 
 // Inserts new `BlockHeader` into database
-func WriteBlockHeader(sh *core.BlockHeader) (uint64, error) {
-	var slotSig []byte
+func WriteBlockHeader(bh *core.BlockHeader) (uint64, error) {
+	var blockSig []byte
 
 	stmt, prepareError := storage.Sql.Prepare(`
 		INSERT INTO block_headers
 		(id, sig, version, height, gas_used, reward, total_tx, state_sig, tx_sig, parent_block_sig, ts) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 	`)
 
 	if prepareError != nil {
 		logger.Err(prepareError)
 	}
 
-	encodedBlock := sh.EncodeRLP()
-	slotSig = core.GenerateBlockHeaderSig(&encodedBlock)
+	encodedBlock := bh.EncodeRLP()
+	blockSig = core.GenerateBlockHeaderSig(&encodedBlock)
 
 	result, insertError := stmt.Exec(
-		sh.Id,
-		core.EncodeBlockHeaderSig(slotSig),
-		sh.Version,
-		sh.Height,
-		sh.GasUsed,
-		sh.Reward,
-		sh.TotalTx,
-		sh.EncodeStateSig(),
-		sh.EncodeTxSig(),
-		sh.EncodeParentBlockSig(),
-		sh.Time,
+		bh.Id,
+		core.EncodeBlockHeaderSig(blockSig),
+		bh.Version,
+		bh.Height,
+		bh.GasUsed,
+		bh.Reward,
+		bh.TotalTx,
+		bh.EncodeStateSig(),
+		bh.EncodeTxSig(),
+		bh.EncodeParentBlockSig(),
+		bh.Time,
 	)
 
 	insertedId, _ := result.LastInsertId()
