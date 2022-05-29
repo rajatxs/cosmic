@@ -22,14 +22,14 @@ type BlockHeader struct {
 	Time           uint64      `json:"time"`
 }
 
-func (sh *BlockHeader) IsEmpty() bool {
-	return (sh.Id == 0 ||
-		sh.Version == 0 ||
-		sh.Height == 0 ||
-		len(sh.ParentBlockSig) == 0 ||
-		len(sh.StateSig) == 0 ||
-		len(sh.TxSig) == 0 ||
-		sh.Time < 1)
+func (bh *BlockHeader) IsEmpty() bool {
+	return (bh.Id == 0 ||
+		bh.Version == 0 ||
+		bh.Height == 0 ||
+		len(bh.ParentBlockSig) == 0 ||
+		len(bh.StateSig) == 0 ||
+		len(bh.TxSig) == 0 ||
+		bh.Time < 1)
 }
 
 func NewBlockHeader(id uint64) BlockHeader {
@@ -45,8 +45,8 @@ func NewBlockHeader(id uint64) BlockHeader {
 	}
 }
 
-func (sh *BlockHeader) EncodeRLP() []byte {
-	encoded, encodeError := rlp.EncodeToBytes(sh)
+func (bh *BlockHeader) EncodeRLP() []byte {
+	encoded, encodeError := rlp.EncodeToBytes(bh)
 
 	if encodeError != nil {
 		logger.Err(encodeError)
@@ -55,8 +55,8 @@ func (sh *BlockHeader) EncodeRLP() []byte {
 	return encoded
 }
 
-func (sh *BlockHeader) VerifySig(sig *[]byte) bool {
-	encodedSlot := sh.EncodeRLP()
+func (bh *BlockHeader) VerifySig(sig *[]byte) bool {
+	encodedSlot := bh.EncodeRLP()
 	computedSig := GenerateBlockHeaderSig(&encodedSlot)
 
 	return bytes.Equal(*sig, computedSig)
@@ -66,22 +66,27 @@ func GenerateBlockHeaderSig(data *[]byte) []byte {
 	return crypto.Sha256(*data)
 }
 
+func (bh *BlockHeader) DeriveSig() []byte {
+	var encoded []byte = bh.EncodeRLP()
+	return GenerateBlockHeaderSig(&encoded)
+}
+
 func EncodeBlockHeaderSig(data []byte) string {
 	return crypto.BytesToHex(data)
 }
 
-func (sh *BlockHeader) EncodeStateSig() string {
-	return crypto.BytesToHex(sh.StateSig)
+func (bh *BlockHeader) EncodeStateSig() string {
+	return crypto.BytesToHex(bh.StateSig)
 }
 
-func (sh *BlockHeader) EncodeTxSig() string {
-	return crypto.BytesToHex(sh.TxSig)
+func (bh *BlockHeader) EncodeTxSig() string {
+	return crypto.BytesToHex(bh.TxSig)
 }
 
-func (sh *BlockHeader) EncodeParentBlockSig() string {
-	return crypto.BytesToHex(sh.ParentBlockSig)
+func (bh *BlockHeader) EncodeParentBlockSig() string {
+	return crypto.BytesToHex(bh.ParentBlockSig)
 }
 
-func ReadFromRLP(data []byte, sh *BlockHeader) {
-	rlp.DecodeBytes(data, &sh)
+func ReadFromRLP(data []byte, bh *BlockHeader) {
+	rlp.DecodeBytes(data, &bh)
 }
