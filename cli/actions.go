@@ -24,5 +24,5 @@ func ShowVersionInformation() {
 }
 
 func ShowUnrecognizedCommandError(cmd *string) {
-	fmt.Printf("%s: %s", color.RedString("Unrecognized command"), *cmd)
+	fmt.Printf("%s: %s\n", color.RedString("Unrecognized command"), *cmd)
 }
