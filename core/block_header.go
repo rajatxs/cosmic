@@ -11,6 +11,7 @@ import (
 
 type BlockHeader struct {
 	Id             uint64      `json:"id"`
+	Sig            ctypes.Hash `json:"sig"`
 	Height         uint64      `json:"height"`
 	Version        uint8       `json:"version"`
 	GasUsed        uint64      `json:"gasUsed"`
