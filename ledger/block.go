@@ -1,6 +1,7 @@
 package ledger
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/rajatxs/cosmic/core"
@@ -19,15 +20,10 @@ func init() {
 	}
 }
 
-// Returns `BlockHeader` by `id`
-func ReadBlockHeaderById(id uint64, bh *core.BlockHeader) error {
-	result := storage.Sql.QueryRow(
-		`SELECT id, height, version, gas_used, reward, total_tx, state_sig, tx_sig, parent_block_sig, ts
-		FROM block_headers WHERE block_headers.id = ?;`,
-		id)
-
-	if scanError := result.Scan(
+func scanBlockHeader(row *sql.Row, bh *core.BlockHeader) error {
+	var err error = row.Scan(
 		&bh.Id,
+		&bh.Sig,
 		&bh.Height,
 		&bh.Version,
 		&bh.GasUsed,
@@ -37,12 +33,22 @@ func ReadBlockHeaderById(id uint64, bh *core.BlockHeader) error {
 		&bh.TxSig,
 		&bh.ParentBlockSig,
 		&bh.Time,
-	); scanError != nil {
-		logger.Err(fmt.Sprintf("Couldn't read block header %d", id), scanError)
-		return scanError
+	)
+	if err != nil {
+		logger.Err(fmt.Sprintf("Couldn't read block header %d", bh.Id), err)
 	}
 
-	return nil
+	return err
+}
+
+// Returns `BlockHeader` by `id`
+func ReadBlockHeaderById(id uint64, bh *core.BlockHeader) error {
+	result := storage.Sql.QueryRow(
+		`SELECT id, sig, height, version, gas_used, reward, total_tx, state_sig, tx_sig, parent_block_sig, ts
+		FROM block_headers WHERE block_headers.id = ?;`,
+		id)
+
+	return scanBlockHeader(result, bh)
 }
 
 func GetLatestBlockId() uint64 {
@@ -53,9 +59,12 @@ func GetLatestBlockId() uint64 {
 	return id
 }
 
-func GetLatestBlock() *core.BlockHeader {
-	var bh *core.BlockHeader
-	return bh
+func ReadLatestBlock(bh *core.BlockHeader) error {
+	result := storage.Sql.QueryRow(
+		`SELECT id, sig, height, version, gas_used, reward, total_tx, state_sig, tx_sig, parent_block_sig, ts
+		FROM block_headers WHERE block_headers.id = ?;`,
+	)
+	return scanBlockHeader(result, bh)
 }
 
 // Inserts new `BlockHeader` into database
@@ -90,6 +99,8 @@ func WriteBlockHeader(bh *core.BlockHeader) (uint64, error) {
 	)
 
 	insertedId, _ := result.LastInsertId()
+
+	stmt.Close()
 
 	return uint64(insertedId), insertError
 }
