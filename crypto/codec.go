@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"encoding/hex"
+  "github.com/btcsuite/btcutil/base58"
 )
 
 var NilSha256Bytes = []byte{
@@ -12,6 +13,14 @@ var NilSha256Bytes = []byte{
 	00, 00, 00, 00, 00,
 	00, 00, 00, 00, 00,
 	00, 00,
+}
+
+func EncodeBase58(d []byte) string {
+  return base58.Encode(d)
+}
+
+func DecodeBase58(v string) []byte {
+  return base58.Decode(v)
 }
 
 // Encodes `data` into hex string
