@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/btcsuite/btcutil v1.0.2
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	golang.org/x/sys v0.0.0-20210816183151-1e6c022a8912 // indirect
