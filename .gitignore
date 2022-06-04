@@ -3,6 +3,7 @@ temp
 .data
 
 debug.sh
+run.sh
 .vscode
 .cache
 *.log
