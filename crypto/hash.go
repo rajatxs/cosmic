@@ -2,6 +2,8 @@ package crypto
 
 import (
 	"crypto/sha256"
+
+	"github.com/rajatxs/cosmic/codec"
 )
 
 /** Generates SHA256 Hash of `data` */
@@ -12,5 +14,5 @@ func Sha256(data []byte) []byte {
 }
 
 func Sha256ToHex(data []byte) string {
-	return BytesToHex(Sha256(data))
+	return codec.BytesToHex(Sha256(data))
 }

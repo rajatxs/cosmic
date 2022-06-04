@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/rajatxs/cosmic/codec"
 	"github.com/rajatxs/cosmic/core/ctypes"
 	"github.com/rajatxs/cosmic/crypto"
 	"github.com/rajatxs/cosmic/logger"
@@ -38,9 +39,9 @@ func NewBlockHeader(id uint64) BlockHeader {
 		Id:             id,
 		Version:        0,
 		Height:         id - 1,
-		ParentBlockSig: crypto.NilSha256Bytes,
-		StateSig:       crypto.NilSha256Bytes,
-		TxSig:          crypto.NilSha256Bytes,
+		ParentBlockSig: codec.NilSha256Bytes,
+		StateSig:       codec.NilSha256Bytes,
+		TxSig:          codec.NilSha256Bytes,
 		GasUsed:        0,
 		Time:           0,
 	}
@@ -70,22 +71,6 @@ func GenerateBlockHeaderSig(data *[]byte) []byte {
 func (bh *BlockHeader) DeriveSig() []byte {
 	var encoded []byte = bh.EncodeRLP()
 	return GenerateBlockHeaderSig(&encoded)
-}
-
-func EncodeBlockHeaderSig(data []byte) string {
-	return crypto.BytesToHex(data)
-}
-
-func (bh *BlockHeader) EncodeStateSig() string {
-	return crypto.BytesToHex(bh.StateSig)
-}
-
-func (bh *BlockHeader) EncodeTxSig() string {
-	return crypto.BytesToHex(bh.TxSig)
-}
-
-func (bh *BlockHeader) EncodeParentBlockSig() string {
-	return crypto.BytesToHex(bh.ParentBlockSig)
 }
 
 func ReadFromRLP(data []byte, bh *BlockHeader) {
