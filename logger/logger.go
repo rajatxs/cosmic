@@ -8,15 +8,36 @@ import (
 )
 
 var (
-	infoLog *log.Logger
-	warnLog *log.Logger
-	errLog  *log.Logger
+	debugLog *log.Logger
+	infoLog  *log.Logger
+	warnLog  *log.Logger
+	errLog   *log.Logger
 )
 
 func init() {
-	infoLog = log.New(os.Stdout, color.CyanString("INFO "), log.Ltime|log.Ldate)
-	warnLog = log.New(os.Stdout, color.YellowString("WARN "), log.Ltime|log.Ldate)
-	errLog = log.New(os.Stdout, color.HiRedString("ERR "), log.Ltime|log.Ldate)
+	debugLog = log.New(
+		os.Stdout,
+		color.YellowString("DEBUG "),
+		log.Ltime|log.Ldate)
+
+	infoLog = log.New(
+		os.Stdout,
+		color.New(color.FgHiGreen).Sprintf("INFO "),
+		log.Ltime|log.Ldate)
+
+	warnLog = log.New(
+		os.Stdout,
+		color.New(color.Bold, color.FgHiYellow).Sprintf("WARN "),
+		log.Ltime|log.Ldate)
+
+	errLog = log.New(
+		os.Stdout,
+		color.New(color.Bold, color.FgRed).Sprintf("ERROR "),
+		log.Ltime|log.Ldate)
+}
+
+func Debug(ctx ...interface{}) {
+	debugLog.Println(ctx...)
 }
 
 func Info(ctx ...interface{}) {
