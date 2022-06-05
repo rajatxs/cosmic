@@ -14,7 +14,7 @@ type BlockHeader struct {
 	Id             uint64      `json:"id"`
 	Sig            ctypes.Hash `json:"sig"`
 	Height         uint64      `json:"height"`
-	Version        uint8       `json:"version"`
+	Version        uint16      `json:"version"`
 	GasUsed        uint64      `json:"gasUsed"`
 	Reward         uint64      `json:"reward"`
 	TotalTx        uint16      `json:"totalTransactions"`
