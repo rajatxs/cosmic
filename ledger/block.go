@@ -41,7 +41,7 @@ func scanBlockHeader(row *sql.Row, bh *core.BlockHeader) error {
 	return err
 }
 
-// Returns `BlockHeader` by `id`
+// Reads `BlockHeader` by `id`
 func ReadBlockHeaderById(id uint64, bh *core.BlockHeader) error {
 	result := storage.Sql.QueryRow(
 		`SELECT id, sig, height, version, gas_used, reward, total_tx, state_sig, tx_sig, parent_block_sig, ts
@@ -51,6 +51,17 @@ func ReadBlockHeaderById(id uint64, bh *core.BlockHeader) error {
 	return scanBlockHeader(result, bh)
 }
 
+// Reads BlockHeader by Signarure
+func ReadBlockHeaderBySig(sig []byte, bh *core.BlockHeader) error {
+	result := storage.Sql.QueryRow(
+		`SELECT id, sig, height, version, gas_used, reward, total_tx, state_sig, tx_sig, parent_block_sig, ts
+		FROM block_headers WHERE block_headers.sig = ?;`,
+		sig)
+
+	return scanBlockHeader(result, bh)
+}
+
+// Reads last inserted block id
 func GetLatestBlockId() uint64 {
 	var id uint64
 
@@ -59,6 +70,7 @@ func GetLatestBlockId() uint64 {
 	return id
 }
 
+// Reads last inserted BlockHeader
 func ReadLatestBlock(bh *core.BlockHeader) error {
 	result := storage.Sql.QueryRow(
 		`SELECT id, sig, height, version, gas_used, reward, total_tx, state_sig, tx_sig, parent_block_sig, ts
@@ -67,7 +79,7 @@ func ReadLatestBlock(bh *core.BlockHeader) error {
 	return scanBlockHeader(result, bh)
 }
 
-// Inserts new `BlockHeader` into database
+// Writes new `BlockHeader` into database
 func WriteBlockHeader(bh *core.BlockHeader) (uint64, error) {
 	var blockSig []byte
 
@@ -81,26 +93,26 @@ func WriteBlockHeader(bh *core.BlockHeader) (uint64, error) {
 		logger.Err(prepareError)
 	}
 
+	defer stmt.Close()
+
 	encodedBlock := bh.EncodeRLP()
 	blockSig = core.GenerateBlockHeaderSig(&encodedBlock)
 
 	result, insertError := stmt.Exec(
 		bh.Id,
-		core.EncodeBlockHeaderSig(blockSig),
+		blockSig,
 		bh.Version,
 		bh.Height,
 		bh.GasUsed,
 		bh.Reward,
 		bh.TotalTx,
-		bh.EncodeStateSig(),
-		bh.EncodeTxSig(),
-		bh.EncodeParentBlockSig(),
+		bh.StateSig,
+		bh.TxSig,
+		bh.ParentBlockSig,
 		bh.Time,
 	)
 
 	insertedId, _ := result.LastInsertId()
-
-	stmt.Close()
 
 	return uint64(insertedId), insertError
 }
