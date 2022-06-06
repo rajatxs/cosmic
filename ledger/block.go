@@ -9,7 +9,7 @@ import (
 	"github.com/rajatxs/cosmic/storage"
 )
 
-const BlockHeaderTableName = "block_headers"
+const BlockHeaderTableName string = "block_headers"
 
 func init() {
 
@@ -71,10 +71,10 @@ func GetLatestBlockId() uint64 {
 }
 
 // Reads last inserted BlockHeader
-func ReadLatestBlock(bh *core.BlockHeader) error {
+func ReadLatestBlockHeader(bh *core.BlockHeader) error {
 	result := storage.Sql.QueryRow(
 		`SELECT id, sig, height, version, gas_used, reward, total_tx, state_sig, tx_sig, parent_block_sig, ts
-		FROM block_headers WHERE block_headers.id = ?;`,
+		FROM block_headers WHERE block_headers.id = (SELECT MAX(id) FROM block_headers) LIMIT 1;`,
 	)
 	return scanBlockHeader(result, bh)
 }
@@ -115,4 +115,8 @@ func WriteBlockHeader(bh *core.BlockHeader) (uint64, error) {
 	insertedId, _ := result.LastInsertId()
 
 	return uint64(insertedId), insertError
+}
+
+func WriteBlockTransactions(id uint64, txs *[]core.Transaction) {
+
 }
