@@ -22,17 +22,10 @@ func init() {
 
 func scanBlockHeader(row *sql.Row, bh *core.BlockHeader) error {
 	var err error = row.Scan(
-		&bh.Id,
-		&bh.Sig,
-		&bh.Height,
-		&bh.Version,
-		&bh.GasUsed,
-		&bh.Reward,
-		&bh.TotalTx,
-		&bh.StateSig,
-		&bh.TxSig,
-		&bh.ParentBlockSig,
-		&bh.Time,
+		&bh.Id, &bh.Sig, &bh.Height,
+		&bh.Version, &bh.GasUsed, &bh.Reward,
+		&bh.TotalTx, &bh.StateSig, &bh.TxSig,
+		&bh.ParentBlockSig, &bh.Time,
 	)
 	if err != nil {
 		logger.Err(fmt.Sprintf("Couldn't read block header %d", bh.Id), err)
@@ -99,24 +92,13 @@ func WriteBlockHeader(bh *core.BlockHeader) (uint64, error) {
 	blockSig = core.GenerateBlockHeaderSig(&encodedBlock)
 
 	result, insertError := stmt.Exec(
-		bh.Id,
-		blockSig,
-		bh.Version,
-		bh.Height,
-		bh.GasUsed,
-		bh.Reward,
-		bh.TotalTx,
-		bh.StateSig,
-		bh.TxSig,
-		bh.ParentBlockSig,
-		bh.Time,
+		bh.Id, blockSig, bh.Version,
+		bh.Height, bh.GasUsed, bh.Reward,
+		bh.TotalTx, bh.StateSig, bh.TxSig,
+		bh.ParentBlockSig, bh.Time,
 	)
 
 	insertedId, _ := result.LastInsertId()
 
 	return uint64(insertedId), insertError
-}
-
-func WriteBlockTransactions(id uint64, txs *[]core.Transaction) {
-
 }
