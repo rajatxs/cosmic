@@ -13,6 +13,12 @@ func Sha256(data []byte) []byte {
 	return h.Sum(nil)
 }
 
-func Sha256ToHex(data []byte) string {
+// Generates SHA256 hash in Hex format
+func Sha256InHex(data []byte) string {
 	return codec.BytesToHex(Sha256(data))
+}
+
+// Generates SHA256 hash Base58 format
+func Sha256ToBase58(data []byte) string {
+  return codec.EncodeBase58(Sha256(data))
 }
