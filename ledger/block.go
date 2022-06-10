@@ -54,6 +54,13 @@ func ReadBlockHeaderBySig(sig []byte, bh *core.BlockHeader) error {
 	return scanBlockHeader(result, bh)
 }
 
+// Check whether specified Block Id is exists or not
+func ExistsBlockId(id uint64) bool {
+	result := storage.Sql.QueryRow("SELECT COUNT(id) FROM block_headers WHERE id = ?;", id)
+	fmt.Println(result)
+	return false
+}
+
 // Reads last inserted block id
 func GetLatestBlockId() uint64 {
 	var id uint64
