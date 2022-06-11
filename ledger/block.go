@@ -22,10 +22,10 @@ func init() {
 
 func scanBlockHeader(row *sql.Row, bh *core.BlockHeader) error {
 	var err error = row.Scan(
-		&bh.Id, &bh.Sig, &bh.Height,
+		&bh.Id, &bh.Code, &bh.Height,
 		&bh.Version, &bh.GasUsed, &bh.Reward,
-		&bh.TotalTx, &bh.StateSig, &bh.TxSig,
-		&bh.ParentBlockSig, &bh.Time,
+		&bh.TotalTx, &bh.StateCode, &bh.TxCode,
+		&bh.ParentBlockCode, &bh.Time,
 	)
 	if err != nil {
 		logger.Err(fmt.Sprintf("Couldn't read block header %d", bh.Id), err)
@@ -94,8 +94,8 @@ func WriteBlockHeader(bh *core.BlockHeader) (uint64, error) {
 	result, insertError := stmt.Exec(
 		bh.Id, blockSig, bh.Version,
 		bh.Height, bh.GasUsed, bh.Reward,
-		bh.TotalTx, bh.StateSig, bh.TxSig,
-		bh.ParentBlockSig, bh.Time,
+		bh.TotalTx, bh.StateCode, bh.TxCode,
+		bh.ParentBlockCode, bh.Time,
 	)
 
 	insertedId, _ := result.LastInsertId()
