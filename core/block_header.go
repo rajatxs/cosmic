@@ -80,20 +80,20 @@ func (bh *BlockHeader) Encode(r *[]byte) error {
 	return nil
 }
 
-func (bh *BlockHeader) VerifySig(sig *[]byte) bool {
+func (bh *BlockHeader) VerifyCode(sig *[]byte) bool {
 	encodedSlot := bh.EncodeRLP()
-	computedSig := GenerateBlockHeaderSig(&encodedSlot)
+	computedSig := GenerateBlockHeaderCode(&encodedSlot)
 
 	return bytes.Equal(*sig, computedSig)
 }
 
-func GenerateBlockHeaderSig(data *[]byte) []byte {
+func GenerateBlockHeaderCode(data *[]byte) []byte {
 	return crypto.Sha256(*data)
 }
 
-func (bh *BlockHeader) DeriveSig() []byte {
+func (bh *BlockHeader) DeriveCode() []byte {
 	var encoded []byte = bh.EncodeRLP()
-	return GenerateBlockHeaderSig(&encoded)
+	return GenerateBlockHeaderCode(&encoded)
 }
 
 func ReadFromRLP(data []byte, bh *BlockHeader) {
