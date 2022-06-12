@@ -34,6 +34,19 @@ func scanBlockHeader(row *sql.Row, bh *core.BlockHeader) error {
 	return err
 }
 
+// Check whether given Block Id is exists or not
+func ExistsBlockId(id uint64) bool {
+	var c uint8
+	result := storage.Sql.QueryRow("SELECT COUNT(id) FROM block_headers WHERE id = ?;", id)
+	result.Scan(&c)
+
+	if c == 1 {
+		return true
+	} else {
+		return false
+	}
+}
+
 // Reads `BlockHeader` by `id`
 func ReadBlockHeaderById(id uint64, bh *core.BlockHeader) error {
 	result := storage.Sql.QueryRow(
@@ -89,7 +102,7 @@ func WriteBlockHeader(bh *core.BlockHeader) (uint64, error) {
 	defer stmt.Close()
 
 	encodedBlock := bh.EncodeRLP()
-	blockSig = core.GenerateBlockHeaderSig(&encodedBlock)
+	blockSig = core.GenerateBlockHeaderCode(&encodedBlock)
 
 	result, insertError := stmt.Exec(
 		bh.Id, blockSig, bh.Version,
