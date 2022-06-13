@@ -100,6 +100,18 @@ func (d *ByteDecoder) ReadUint64(r *uint64) {
 	d.offset += Uint64Size
 }
 
+// Reads list of bytes from byte slice
+func (d *ByteDecoder) ReadByteList(r *[][]byte, size int) {
+	var lsize, i uint32
+	var bytes []byte
+	d.ReadUint32(&lsize)
+
+	for ; i < lsize; i += 1 {
+		d.ReadBytes(&bytes, size)
+		*r = append(*r, bytes)
+	}
+}
+
 // Reset offset of ByteDecoder
 func (d *ByteDecoder) Reset() {
 	d.offset = 0

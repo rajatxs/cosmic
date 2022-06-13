@@ -101,3 +101,15 @@ func (e *ByteEncoder) WriteUint64(v uint64) {
 	binary.BigEndian.PutUint64(e.Bytes[e.offset:], v)
 	e.offset += Uint64Size
 }
+
+// Writes list of byte to byte slice
+func (e *ByteEncoder) WriteByteList(list [][]byte) {
+	var lsize uint32 = uint32(len(list))
+
+	// Writes size of byte list
+	e.WriteUint32(lsize)
+
+	for _, item := range list {
+		e.WriteBytes(item)
+	}
+}
