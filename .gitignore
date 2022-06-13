@@ -3,7 +3,10 @@ temp
 .data
 
 debug.sh
+debug.bat
 run.sh
+run.bat
+
 .vscode
 .cache
 *.log
