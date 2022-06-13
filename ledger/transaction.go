@@ -22,13 +22,13 @@ func init() {
 
 func scanTransaction(row *sql.Row, tx *core.Transaction) error {
 	var err error = row.Scan(
-		&tx.Sig, &tx.Sequence, &tx.Type,
+		&tx.Code, &tx.Sequence, &tx.Type,
 		&tx.Nonce, &tx.Sender, &tx.SuppliedGas,
 		&tx.GasLimit, &tx.Value, &tx.Receiver,
 		&tx.Proof, &tx.Expiration, &tx.Timestamp,
 	)
 	if err != nil {
-		logger.Err(fmt.Sprintf("Couldn't read block header %v", tx.Sig), err)
+		logger.Err(fmt.Sprintf("Couldn't read block header %v", tx.Code), err)
 	}
 
 	return err
@@ -41,7 +41,7 @@ func scanTransactions(rows *sql.Rows, txs *[]core.Transaction) error {
 		tx := &core.Transaction{}
 
 		err = rows.Scan(
-			tx.Sig, tx.Sequence, tx.Type,
+			tx.Code, tx.Sequence, tx.Type,
 			tx.Nonce, tx.Sender, tx.SuppliedGas,
 			tx.GasLimit, tx.Value, tx.Receiver,
 			tx.Proof, tx.Expiration, tx.Timestamp,
@@ -97,7 +97,7 @@ func WriteTransaction(bid uint64, tx *core.Transaction) (uint64, error) {
 	defer stmt.Close()
 
 	result, insertError := stmt.Exec(
-		tx.Sig, bid, tx.Sequence,
+		tx.Code, bid, tx.Sequence,
 		tx.Type, tx.Nonce, tx.Sender,
 		tx.SuppliedGas, tx.GasLimit, tx.Value,
 		tx.Receiver, tx.Proof, tx.Expiration,

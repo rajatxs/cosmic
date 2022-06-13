@@ -20,5 +20,5 @@ func Sha256InHex(data []byte) string {
 
 // Generates SHA256 hash Base58 format
 func Sha256ToBase58(data []byte) string {
-  return codec.EncodeBase58(Sha256(data))
+	return codec.EncodeBase58(Sha256(data))
 }

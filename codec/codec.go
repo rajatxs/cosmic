@@ -6,6 +6,14 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 )
 
+const (
+	ByteSize   int = 1
+	BoolSize   int = 1
+	Uint16Size int = 2
+	Uint32Size int = 4
+	Uint64Size int = 8
+)
+
 var NilSha256Bytes = []byte{
 	00, 00, 00, 00, 00,
 	00, 00, 00, 00, 00,

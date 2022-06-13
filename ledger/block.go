@@ -22,16 +22,29 @@ func init() {
 
 func scanBlockHeader(row *sql.Row, bh *core.BlockHeader) error {
 	var err error = row.Scan(
-		&bh.Id, &bh.Sig, &bh.Height,
+		&bh.Id, &bh.Code, &bh.Height,
 		&bh.Version, &bh.GasUsed, &bh.Reward,
-		&bh.TotalTx, &bh.StateSig, &bh.TxSig,
-		&bh.ParentBlockSig, &bh.Time,
+		&bh.TotalTx, &bh.StateCode, &bh.TxCode,
+		&bh.ParentBlockCode, &bh.Time,
 	)
 	if err != nil {
 		logger.Err(fmt.Sprintf("Couldn't read block header %d", bh.Id), err)
 	}
 
 	return err
+}
+
+// Check whether given Block Id is exists or not
+func ExistsBlockId(id uint64) bool {
+	var c uint8
+	result := storage.Sql.QueryRow("SELECT COUNT(id) FROM block_headers WHERE id = ?;", id)
+	result.Scan(&c)
+
+	if c == 1 {
+		return true
+	} else {
+		return false
+	}
 }
 
 // Reads `BlockHeader` by `id`
@@ -96,13 +109,13 @@ func WriteBlockHeader(bh *core.BlockHeader) (uint64, error) {
 	defer stmt.Close()
 
 	encodedBlock := bh.EncodeRLP()
-	blockSig = core.GenerateBlockHeaderSig(&encodedBlock)
+	blockSig = core.GenerateBlockHeaderCode(&encodedBlock)
 
 	result, insertError := stmt.Exec(
 		bh.Id, blockSig, bh.Version,
 		bh.Height, bh.GasUsed, bh.Reward,
-		bh.TotalTx, bh.StateSig, bh.TxSig,
-		bh.ParentBlockSig, bh.Time,
+		bh.TotalTx, bh.StateCode, bh.TxCode,
+		bh.ParentBlockCode, bh.Time,
 	)
 
 	insertedId, _ := result.LastInsertId()
