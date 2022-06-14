@@ -8,6 +8,8 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.12
 )
 
+require github.com/boltdb/bolt v1.3.1 // indirect
+
 require (
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/mattn/go-colorable v0.1.9 // indirect
