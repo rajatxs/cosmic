@@ -12,7 +12,6 @@ import (
 
 type BlockHeader struct {
 	Id              uint64          `json:"id"`
-	Code            ctype.BlockCode `json:"code"`
 	Height          uint64          `json:"height"`
 	Version         uint16          `json:"version"`
 	GasUsed         uint64          `json:"gasUsed"`

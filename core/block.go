@@ -1,10 +1,14 @@
 package core
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/rajatxs/cosmic/ctype"
+)
 
 type Block struct {
-	Header       *BlockHeader   `json:"header"`
-	Transactions *[]Transaction `json:"transactions"`
+	Header       *BlockHeader                   `json:"header"`
+	Transactions *map[*ctype.TxCode]Transaction `json:"transactions"`
 }
 
 func NewBlock() *Block {
@@ -23,6 +27,12 @@ func (b *Block) SanityCheck() error {
 		return errors.New("invalid Block Time")
 	case b.Header.Version > 0:
 		return errors.New("invalid Block Version")
+	case len(b.Header.ParentBlockCode) != 32:
+		return errors.New("invalid parent block code")
+	case len(b.Header.StateCode) != 32:
+		return errors.New("invalid state code")
+	case len(b.Header.TxCode) != 32:
+		return errors.New("invalid tx code")
 	}
 
 	return nil
