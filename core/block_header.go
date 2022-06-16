@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+  "fmt"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/rajatxs/cosmic/codec"
@@ -12,7 +13,6 @@ import (
 
 type BlockHeader struct {
 	Id              uint64          `json:"id"`
-	Height          uint64          `json:"height"`
 	Version         uint16          `json:"version"`
 	GasUsed         uint64          `json:"gasUsed"`
 	Reward          uint64          `json:"reward"`
@@ -26,7 +26,6 @@ type BlockHeader struct {
 func (bh *BlockHeader) IsEmpty() bool {
 	return (bh.Id == 0 ||
 		bh.Version == 0 ||
-		bh.Height == 0 ||
 		len(bh.ParentBlockCode) == 0 ||
 		len(bh.StateCode) == 0 ||
 		len(bh.TxCode) == 0 ||
@@ -37,7 +36,6 @@ func NewBlockHeader(id uint64) BlockHeader {
 	return BlockHeader{
 		Id:              id,
 		Version:         0,
-		Height:          id - 1,
 		ParentBlockCode: codec.NilSha256Bytes,
 		StateCode:       codec.NilSha256Bytes,
 		TxCode:          codec.NilSha256Bytes,
@@ -60,7 +58,6 @@ func (bh *BlockHeader) Encode(r *[]byte) error {
 	enc := codec.NewByteEncoder(140)
 
 	enc.WriteUint64(bh.Id)
-	enc.WriteUint64(bh.Height)
 	enc.WriteUint16(bh.Version)
 	enc.WriteUint64(bh.GasUsed)
 	enc.WriteUint64(bh.Reward)
@@ -77,6 +74,25 @@ func (bh *BlockHeader) Encode(r *[]byte) error {
 	*r = enc.Bytes
 
 	return nil
+}
+
+func (bh *BlockHeader) SanityCheck() error {
+  switch {
+	case bh.Id == 0:
+    return fmt.Errorf("incorrect block id %d", bh.Id)
+	case bh.Version == 0:
+    return fmt.Errorf("incorrect block version %d", bh.Version)
+	case bh.Time == 0:
+    return fmt.Errorf("invalid block timestamp %d", bh.Time)
+	case len(bh.ParentBlockCode) != 32:
+    return fmt.Errorf("invalid parent block code %v", bh.ParentBlockCode)
+	case len(bh.StateCode) != 32:
+    return fmt.Errorf("invalid block state code %v", bh.StateCode)
+	case len(bh.TxCode) != 32:
+    return fmt.Errorf("invalid block tx code %v", bh.TxCode)
+	}
+
+  return nil
 }
 
 func (bh *BlockHeader) VerifyCode(sig *[]byte) bool {
