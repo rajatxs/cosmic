@@ -72,6 +72,15 @@ func (e *ByteEncoder) WriteBytes(v []byte) {
 	e.offset += bsize
 }
 
+func (e *ByteEncoder) WriteSizedBytes(v []byte, size int) {
+	if e.expandSize(size) != nil {
+		return
+	}
+
+	copy(e.Bytes[e.offset:], v)
+	e.offset += size
+}
+
 // Writes bytes of type uint16 to byte slice
 func (e *ByteEncoder) WriteUint16(v uint16) {
 	if e.expandSize(Uint16Size) != nil {

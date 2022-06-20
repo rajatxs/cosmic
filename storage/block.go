@@ -11,7 +11,9 @@ func init() {
 	UseBucket(blockBucketId)
 }
 
-func WriteBlock() {
+func WriteBlock(b *core.Block) {
+	// var bc []byte = b.
+
 	core.Db.Update(func(tx *bolt.Tx) error {
 		buck := getBlockBucket(tx)
 		return buck.Put([]byte("first"), []byte("Test Block"))

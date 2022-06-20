@@ -2,7 +2,7 @@ package core
 
 import (
 	"bytes"
-  "fmt"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/rajatxs/cosmic/codec"
@@ -54,7 +54,7 @@ func (bh *BlockHeader) EncodeRLP() []byte {
 	return encoded
 }
 
-func (bh *BlockHeader) Encode(r *[]byte) error {
+func (bh *BlockHeader) Marshal(r *[]byte) error {
 	enc := codec.NewByteEncoder(140)
 
 	enc.WriteUint64(bh.Id)
@@ -76,23 +76,42 @@ func (bh *BlockHeader) Encode(r *[]byte) error {
 	return nil
 }
 
+func UnmarshalBlockHeader(data []byte) *BlockHeader {
+	var (
+		bh  BlockHeader
+		dec codec.ByteDecoder = *codec.NewByteDecoder(data)
+	)
+
+	dec.ReadUint64(&bh.Id)
+	dec.ReadUint16(&bh.Version)
+	dec.ReadUint64(&bh.GasUsed)
+	dec.ReadUint64(&bh.Reward)
+	dec.ReadUint16(&bh.TotalTx)
+	dec.ReadBytes(&bh.StateCode, 32)
+	dec.ReadBytes(&bh.TxCode, 32)
+	dec.ReadBytes(&bh.ParentBlockCode, 32)
+	dec.ReadUint64(&bh.Time)
+
+	return &bh
+}
+
 func (bh *BlockHeader) SanityCheck() error {
-  switch {
+	switch {
 	case bh.Id == 0:
-    return fmt.Errorf("incorrect block id %d", bh.Id)
+		return fmt.Errorf("incorrect block id %d", bh.Id)
 	case bh.Version == 0:
-    return fmt.Errorf("incorrect block version %d", bh.Version)
+		return fmt.Errorf("incorrect block version %d", bh.Version)
 	case bh.Time == 0:
-    return fmt.Errorf("invalid block timestamp %d", bh.Time)
+		return fmt.Errorf("invalid block timestamp %d", bh.Time)
 	case len(bh.ParentBlockCode) != 32:
-    return fmt.Errorf("invalid parent block code %v", bh.ParentBlockCode)
+		return fmt.Errorf("invalid parent block code %v", bh.ParentBlockCode)
 	case len(bh.StateCode) != 32:
-    return fmt.Errorf("invalid block state code %v", bh.StateCode)
+		return fmt.Errorf("invalid block state code %v", bh.StateCode)
 	case len(bh.TxCode) != 32:
-    return fmt.Errorf("invalid block tx code %v", bh.TxCode)
+		return fmt.Errorf("invalid block tx code %v", bh.TxCode)
 	}
 
-  return nil
+	return nil
 }
 
 func (bh *BlockHeader) VerifyCode(sig *[]byte) bool {
