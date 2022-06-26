@@ -1,6 +1,7 @@
 package codec
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 )
@@ -72,7 +73,7 @@ func (e *ByteEncoder) WriteBytes(v []byte) {
 	e.offset += bsize
 }
 
-func (e *ByteEncoder) WriteSizedBytes(v []byte, size int) {
+func (e *ByteEncoder) WriteFixedBytes(v []byte, size int) {
 	if e.expandSize(size) != nil {
 		return
 	}
@@ -109,4 +110,77 @@ func (e *ByteEncoder) WriteUint64(v uint64) {
 
 	binary.BigEndian.PutUint64(e.Bytes[e.offset:], v)
 	e.offset += Uint64Size
+}
+
+type EncodeBuffer struct {
+	err  error
+	buff *bytes.Buffer
+}
+
+func NewEncodeBuffer() *EncodeBuffer {
+	return &EncodeBuffer{
+		err:  nil,
+		buff: &bytes.Buffer{},
+	}
+}
+
+func (e *EncodeBuffer) Buffer() *bytes.Buffer {
+	return e.buff
+}
+
+func (e *EncodeBuffer) Error() error {
+	return e.err
+}
+
+func (e *EncodeBuffer) WriteUint64(v uint64) {
+	if e.err != nil {
+		return
+	}
+
+	e.err = binary.Write(e.buff, binary.BigEndian, v)
+}
+
+func (e *EncodeBuffer) WriteUint32(v uint32) {
+	if e.err != nil {
+		return
+	}
+
+	e.err = binary.Write(e.buff, binary.BigEndian, v)
+}
+
+func (e *EncodeBuffer) WriteUint16(v uint16) {
+	if e.err != nil {
+		return
+	}
+
+	e.err = binary.Write(e.buff, binary.BigEndian, v)
+}
+
+func (e *EncodeBuffer) WriteSingleByte(v byte) {
+	if e.err != nil {
+		return
+	}
+
+	e.err = binary.Write(e.buff, binary.BigEndian, v)
+}
+
+func (e *EncodeBuffer) WriteBool(v bool) {
+	if e.err != nil {
+		return
+	}
+
+	e.err = binary.Write(e.buff, binary.BigEndian, v)
+}
+
+func (e *EncodeBuffer) WriteFixedBytes(v []byte) {
+	if e.err != nil {
+		return
+	}
+
+	e.err = binary.Write(e.buff, binary.BigEndian, v)
+}
+
+func (e *EncodeBuffer) Reset() {
+	e.err = nil
+	e.buff.Reset()
 }

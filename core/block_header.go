@@ -8,7 +8,6 @@ import (
 	"github.com/rajatxs/cosmic/codec"
 	"github.com/rajatxs/cosmic/crypto"
 	"github.com/rajatxs/cosmic/ctype"
-	"github.com/rajatxs/cosmic/logger"
 )
 
 type BlockHeader struct {
@@ -45,16 +44,30 @@ func NewBlockHeader(id uint64) BlockHeader {
 }
 
 func (bh *BlockHeader) EncodeRLP() []byte {
-	encoded, encodeError := rlp.EncodeToBytes(bh)
+	// encoded, encodeError := rlp.EncodeToBytes(bh)
+	var w bytes.Buffer
 
-	if encodeError != nil {
-		logger.Err(encodeError)
-	}
+	// if encodeError != nil {
+	// 	logger.Err(encodeError)
+	// }
 
-	return encoded
+	buff := rlp.NewEncoderBuffer(&w)
+
+	buff.WriteUint64(bh.Id)
+	buff.WriteUint64(uint64(bh.Version))
+	buff.WriteUint64(bh.GasUsed)
+	buff.WriteUint64(bh.Reward)
+	buff.WriteUint64(uint64(bh.TotalTx))
+	buff.WriteBytes(bh.StateCode[:])
+	buff.WriteBytes(bh.TxCode[:])
+	buff.WriteBytes(bh.ParentBlockCode[:])
+	buff.WriteUint64(bh.Time)
+
+	// return encoded
+	return buff.ToBytes()
 }
 
-func (bh *BlockHeader) Marshal(r *[]byte) error {
+func (bh *BlockHeader) Marshal() ([]byte, error) {
 	enc := codec.NewByteEncoder(140)
 
 	enc.WriteUint64(bh.Id)
@@ -68,12 +81,10 @@ func (bh *BlockHeader) Marshal(r *[]byte) error {
 	enc.WriteUint64(bh.Time)
 
 	if enc.Error != nil {
-		return enc.Error
+		return nil, enc.Error
 	}
 
-	*r = enc.Bytes
-
-	return nil
+	return enc.Bytes, nil
 }
 
 func UnmarshalBlockHeader(data []byte) *BlockHeader {

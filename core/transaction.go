@@ -70,8 +70,8 @@ func (tx *Transaction) SanityCheck() error {
 	return nil
 }
 
-func (tx *Transaction) Marshal(r *[]byte) {
-	var size int = 47 + 64 + len(tx.Payload)
+func (tx *Transaction) Marshal() ([]byte, error) {
+	var size int = 47 + 64 + 1000 + len(tx.Payload)
 	enc := codec.NewByteEncoder(size)
 
 	enc.WriteUint16(tx.Sequence)
@@ -82,10 +82,14 @@ func (tx *Transaction) Marshal(r *[]byte) {
 	enc.WriteUint64(tx.GasLimit)
 	enc.WriteUint64(tx.Value)
 	enc.WriteBytes(tx.Receiver)
-	enc.WriteSizedBytes(tx.Proof, 64)
+	enc.WriteFixedBytes(tx.Proof, 64)
 	enc.WriteUint64(tx.Timestamp)
 	enc.WriteUint64(tx.Expiration)
-	enc.WriteSizedBytes(tx.Payload, 128)
+	enc.WriteFixedBytes(tx.Payload, 128)
 
-	*r = enc.Bytes
+	if enc.Error != nil {
+		return nil, enc.Error
+	}
+
+	return enc.Bytes, nil
 }

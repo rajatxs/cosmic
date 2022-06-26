@@ -1,6 +1,7 @@
 package codec
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 )
@@ -104,4 +105,28 @@ func (d *ByteDecoder) ReadUint64(r *uint64) {
 func (d *ByteDecoder) Reset() {
 	d.offset = 0
 	d.Error = nil
+}
+
+type DecodeBuffer struct {
+	err    error
+	buff   *bytes.Reader
+	offset int
+}
+
+func NewDecodeBuffer(b []byte) *DecodeBuffer {
+	return &DecodeBuffer{
+		err:    nil,
+		buff:   bytes.NewReader(b),
+		offset: len(b),
+	}
+}
+
+func (d *DecodeBuffer) ReadUint64(r *uint64) {
+	if d.err != nil {
+		return
+	}
+
+	*r, _ = binary.ReadUvarint(d.buff)
+
+	// binary.Read(d.buff.ReadAt(), binary.BigEndian, r)
 }
